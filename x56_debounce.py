@@ -20,28 +20,39 @@ if len(sys.argv) == 2:
 else:
     dbTime = 50000
 joys = [js.Joystick(i) for i in range(js.get_count())]
+other_numbuttons = -1
+other_numaxes = -1
+    
 for i in range(js.get_count()):
     joys[i] = js.Joystick(i)
     joys[i].init()
-    
+    print("Device %d: %s" % (i, joys[i].get_name()))
     if joys[i].get_name() == "Saitek Pro Flight X-56 Rhino Throttle":
-        print("X56 Throttle found at index %d" % i)
+        print("   X56 Throttle found at index %d" % i)
         x56 = joys[i]
-        print("Buttons: %d" % x56.get_numbuttons())
-        print("Axes: %d\n" % x56.get_numaxes())
+        print("    Buttons: %d" % x56.get_numbuttons())
+        print("    Axes: %d\n" % x56.get_numaxes())
         x56_found = True
-    
-    elif joys[i].get_name() == "vJoy Device":
-        print("vJoy Device found at index %d" % i)
-        vJoy = joys[i]
-        print("Buttons: %d" % vJoy.get_numbuttons())
-        print("Axes: %d\n" % vJoy.get_numaxes())
-        vJoy_found = True
-        j = vj.VJoyDevice(1)
+        other_numaxes = x56.get_numaxes()
+        other_numbuttons = x56.get_numbuttons()
 
-    else:
-        print("Other joystick/gamepad: %s\n" % joys[i].get_name())
-        
+if not x56_found:
+    print("No x56 throttle present")
+
+for i in range(js.get_count()):
+    joys[i] = js.Joystick(i)
+    
+    if joys[i].get_name() == "vJoy Device":
+        print("   vJoy Device found at index %d" % i)
+        vJoy = joys[i]
+        print("    Buttons: %d" % vJoy.get_numbuttons())
+        print("    Axes: %d\n" % vJoy.get_numaxes())
+        if vJoy.get_numaxes() < other_numaxes and vJoy.get_numbuttons < other_numaxes:
+            print("    Too few axes or buttons of the vJoy device, skipping..\n")
+        else:
+            vJoy_found = True
+            j = vj.VJoyDevice(1)
+
     if vJoy_found and x56_found:
         break
         
@@ -105,7 +116,7 @@ while  vJoy_found and x56_found:
         button_states[button_count-3:button_count] = np.copy(button_states_mem[button_count-3:button_count])
 
     for i in range(axis_count):
-        j.set_axis(i + 0x30,int(axis_state[i] * 0x8000 + 0x3FFF))
+        j.set_axis(i + vj.HID_USAGE_LOW,int(axis_state[i] * 0x8000 + 0x3FFF))
         
     for i in range(button_count):
         if (i>30 or i<29):
