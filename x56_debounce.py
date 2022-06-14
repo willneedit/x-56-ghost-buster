@@ -96,7 +96,7 @@ while  vJoy_found and x56_found:
             else:
                 axis_dropped[i] = False
                 axis_state[i] = new_axis_state
-                # print("Axis %d state %6.3f (%d)" % (i , axis_state[i], int(axis_state[i] * 0x8000 + 0x7FFF )))
+                # print("Axis %d state %6.3f (%d)" % (i , axis_state[i], int(axis_state[i] * 0x8000 + 0x3FFF )))
 
     button_states_mem = np.copy(button_states)
 
@@ -118,7 +118,7 @@ while  vJoy_found and x56_found:
         button_states[button_count-3:button_count] = np.copy(button_states_mem[button_count-3:button_count])
 
     for i in range(axis_count):
-        j.set_axis(i + vj.HID_USAGE_LOW,int(axis_state[i] * 0x8000 + 0x7FFF))
+        j.set_axis(i + vj.HID_USAGE_LOW,int(axis_state[i] * 0x8000 + 0x3FFF))
         
     for i in range(button_count):
         if (i>30 or i<29):
